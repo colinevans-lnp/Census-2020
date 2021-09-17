@@ -1,0 +1,259 @@
+# Set working directory
+```{r}
+# CHANGE THIS 
+
+setwd("~/Repos/Census 2020")
+
+options(scipen = 100)
+```
+# Call libraries
+```{r}
+library(tidyverse)
+library(readxl)
+library(tidycensus)
+library(fuzzyjoin)
+library(censusapi)
+```
+
+# Set up Census API and define variables
+```{r}
+# Activate key
+census_api_key <- "bce22709ad6740c9317b4e1cd4360f02424e7743"
+
+# List available APIs
+apis <- listCensusApis()
+
+# List available geographies
+geographies <- listCensusMetadata("dec/pl", vintage = 2010, type = "geographies", group = NULL)
+
+# Import lists of variables
+v10 <- listCensusMetadata("dec/pl", vintage = 2010, type = "variables", group = NULL)
+v20 <- listCensusMetadata("dec/pl", vintage = 2020, type = "variables", group = NULL)
+
+# Define race variables
+vars_race_2010 <- c("NAME", "P002001", "P002005", "P002006", "P002002", "P002007", "P002008", "P002009", "P002010", "P002011")
+vars_race_2020 <- c("NAME", "P2_001N", "P2_005N", "P2_006N", "P2_002N", "P2_007N", "P2_008N", "P2_009N", "P2_010N", "P2_011N")
+```
+
+# Import and clean population data (2010 & 2020)
+```{r}
+# County total population
+LancCo_Population_2010 <- getCensus(name = "dec/pl", vintage = 2010, vars = c("NAME", "P001001"), region = "county:071", key = census_api_key, regionin = "state:42")
+LancCo_Population_2020 <- getCensus(name = "dec/pl", vintage = 2020, vars = c("NAME", "P1_001N"), region = "county:071", key = census_api_key, regionin = "state:42")
+
+# Population by Place
+LancCo_Population_by_Place_2010 <- getCensus(name = "dec/pl", vintage = 2010, vars = c("NAME","P001001"), region = "county subdivision:*", key = census_api_key, regionin= ("state:42+county:071"))
+LancCo_Population_by_Place_2020 <- getCensus(name = "dec/pl", vintage = 2020, vars = c("NAME","P1_001N"), region = "county subdivision:*", key = census_api_key, regionin= ("state:42+county:071"))
+
+# Remove code columns
+LancCo_Population_by_Place_2010 <- LancCo_Population_by_Place_2010[, -c(1:3)]
+LancCo_Population_by_Place_2020 <- LancCo_Population_by_Place_2020[, -c(1:3)]
+
+# Define column names
+names_population <- c("County_subdivision", "Total_population")
+
+# Change column names
+names(LancCo_Population_by_Place_2010) <- names_population
+names(LancCo_Population_by_Place_2020) <- names_population
+
+# Arrange in alphabetical order
+LancCo_Population_by_Place_2010 <- LancCo_Population_by_Place_2010 %>% 
+  arrange(County_subdivision)
+LancCo_Population_by_Place_2020 <- LancCo_Population_by_Place_2020 %>% 
+  arrange(County_subdivision)
+
+# Export
+write_csv(LancCo_Population_by_Place_2010, "LancCo_Population_by_Place_2010.csv")
+write_csv(LancCo_Population_by_Place_2020, "LancCo_Population_by_Place_2020.csv")
+```
+
+# Import and clean race data (2010 & 2020)
+```{r}
+### COUNTY RACE TOTAL
+
+# Define column names
+names_race <- c("County_subdivision", "Total_population", "NonHispanic_White", "NonHispanic_Black", "Hispanic", "NonHispanic_AIAN", "NonHispanic_Asian", "NonHispanic_NHPI", "NonHispanic_Some_Other_Race", "NonHispanic_Two_Or_More_Races")
+
+# Import county race total
+LancCo_Race_Total_2010 <- getCensus(name = "dec/pl", vintage = 2010, vars = vars_race_2010, region = "county:071", key = census_api_key, regionin = "state:42")
+LancCo_Race_Total_2020 <- getCensus(name = "dec/pl", vintage = 2020, vars = vars_race_2020, region = "county:071", key = census_api_key, regionin = "state:42")
+
+# Remove code columns
+LancCo_Race_Total_2010 <- LancCo_Race_Total_2010[, -c(1:2)]
+LancCo_Race_Total_2020 <- LancCo_Race_Total_2020[, -c(1:2)]
+
+# Change column names
+names(LancCo_Race_Total_2010) <- names_race
+names(LancCo_Race_Total_2020) <- names_race
+
+# Add nonwhite column
+LancCo_Race_Total_2010 <- LancCo_Race_Total_2010 %>% 
+  rowwise(County_subdivision) %>% 
+  mutate(Nonwhite = Total_population - NonHispanic_White)
+LancCo_Race_Total_2020 <- LancCo_Race_Total_2020 %>% 
+  rowwise(County_subdivision) %>% 
+  mutate(Nonwhite = Total_population - NonHispanic_White)
+
+### RACE BY PLACE
+
+# Import race by place
+LancCo_Race_by_Place_2010 <- getCensus(name = "dec/pl", vintage = 2010, vars = vars_race_2010, region = "county subdivision:*", key = census_api_key, regionin= ("state:42+county:071"))
+LancCo_Race_by_Place_2020 <- getCensus(name = "dec/pl", vintage = 2020, vars = vars_race_2020, region = "county subdivision:*", key = census_api_key, regionin= ("state:42+county:071"))
+
+# Remove code columns
+LancCo_Race_by_Place_2010 <- LancCo_Race_by_Place_2010[, -c(1:3)]
+LancCo_Race_by_Place_2020 <- LancCo_Race_by_Place_2020[, -c(1:3)]
+
+# Change column names
+names(LancCo_Race_by_Place_2010) <- names_race
+names(LancCo_Race_by_Place_2020) <- names_race
+
+# Delete county + state from name column
+LancCo_Race_by_Place_2010$County_subdivision <- LancCo_Race_by_Place_2010$County_subdivision %>%  str_remove(fixed(", Lancaster County, Pennsylvania"))
+LancCo_Race_by_Place_2020$County_subdivision <- LancCo_Race_by_Place_2020$County_subdivision %>%  str_remove(fixed(", Lancaster County, Pennsylvania"))
+
+# Add nonwhite column
+LancCo_Race_by_Place_2010 <- LancCo_Race_by_Place_2010 %>% 
+  rowwise(County_subdivision) %>% 
+  mutate(Nonwhite = Total_population - NonHispanic_White)
+LancCo_Race_by_Place_2020 <- LancCo_Race_by_Place_2020 %>% 
+  rowwise(County_subdivision) %>% 
+  mutate(Nonwhite = Total_population - NonHispanic_White)
+
+# Arrange columns in alphabetical order
+LancCo_Race_by_Place_2010 <- LancCo_Race_by_Place_2010 %>% 
+  arrange(County_subdivision)
+LancCo_Race_by_Place_2020 <- LancCo_Race_by_Place_2020 %>% 
+  arrange(County_subdivision)
+
+# Export
+write_csv(LancCo_Race_by_Place_2010, "LancCo_Race_by_Place_2010.csv")
+write_csv(LancCo_Race_by_Place_2020, "LancCo_Race_by_Place_2020.csv")
+
+## Race by place percentages 2010
+
+LancCo_Race_by_Place_percentages_2010 <- LancCo_Race_by_Place_2010 %>% 
+  mutate(NonHispanic_White_percentage = round(NonHispanic_White / Total_population * 100, digits = 1),
+         NonHispanic_Black_percentage = round(NonHispanic_Black / Total_population * 100, digits = 1),
+         Hispanic_percentage = round(Hispanic/ Total_population * 100, digits = 1),
+         NonHispanic_AIAN_percentage = round(NonHispanic_AIAN / Total_population * 100, digits = 1),
+         NonHispanic_Asian_percentage = round(NonHispanic_Asian / Total_population * 100, digits = 1),
+         NonHispanic_NHPI_percentage = round(NonHispanic_NHPI / Total_population * 100, digits = 1),
+         NonHispanic_Someotherrace_percentage = round(NonHispanic_Some_Other_Race / Total_population * 100, digits = 1),
+         NonHispanic_Twoormoreraces_percentage = round(NonHispanic_Two_Or_More_Races / Total_population * 100, digits = 1)) %>% 
+  select(County_subdivision, Total_population, NonHispanic_White_percentage, NonHispanic_Black_percentage, Hispanic_percentage, NonHispanic_AIAN_percentage, NonHispanic_Asian_percentage, NonHispanic_NHPI_percentage, NonHispanic_Someotherrace_percentage, NonHispanic_Twoormoreraces_percentage) %>% 
+  mutate(Nonwhite_percentage = 100-NonHispanic_White_percentage)
+
+## Race by place percentages 2020
+
+LancCo_Race_by_Place_percentages_2020 <- LancCo_Race_by_Place_2020 %>% 
+  mutate(NonHispanic_White_percentage = round(NonHispanic_White / Total_population * 100, digits = 1),
+         NonHispanic_Black_percentage = round(NonHispanic_Black / Total_population * 100, digits = 1),
+         Hispanic_percentage = round(Hispanic/ Total_population * 100, digits = 1),
+         NonHispanic_AIAN_percentage = round(NonHispanic_AIAN / Total_population * 100, digits = 1),
+         NonHispanic_Asian_percentage = round(NonHispanic_Asian / Total_population * 100, digits = 1),
+         NonHispanic_NHPI_percentage = round(NonHispanic_NHPI / Total_population * 100, digits = 1),
+         NonHispanic_Someotherrace_percentage = round(NonHispanic_Some_Other_Race / Total_population * 100, digits = 1),
+         NonHispanic_Twoormoreraces_percentage = round(NonHispanic_Two_Or_More_Races / Total_population * 100, digits = 1)) %>% 
+  select(County_subdivision, Total_population, NonHispanic_White_percentage, NonHispanic_Black_percentage, Hispanic_percentage, NonHispanic_AIAN_percentage, NonHispanic_Asian_percentage, NonHispanic_NHPI_percentage, NonHispanic_Someotherrace_percentage, NonHispanic_Twoormoreraces_percentage) %>% 
+  mutate(Nonwhite_percentage = 100-NonHispanic_White_percentage)
+```
+
+# Compare race data (2010 & 2020)
+```{r}
+# Countywide change in race
+LancCo_Change_in_Race_total <- merge(LancCo_Race_Total_2020, LancCo_Race_Total_2010, by = "County_subdivision") %>% 
+  mutate(Total_population = .[[2]] - .[[12]]) %>%
+  mutate(NonHispanic_White = .[[3]] - .[[13]]) %>%
+  mutate(NonHispanic_Black = .[[4]] - .[[14]]) %>%
+  mutate(Hispanic = .[[5]] - .[[15]]) %>%
+  mutate(NonHispanic_AIAN = .[[6]] - .[[16]]) %>%
+  mutate(NonHispanic_Asian = .[[7]] - .[[17]]) %>%
+  mutate(NonHispanic_NHPI = .[[8]] - .[[18]]) %>%
+  mutate(NonHispanic_Some_Other_Race = .[[9]] - .[[19]]) %>%
+  mutate(NonHispanic_Two_Or_More_Races = .[[10]] - .[[20]]) %>%
+  mutate(Nonwhite = .[[11]] - .[[21]]) %>%
+  rowwise(County_subdivision) %>% 
+  select(County_subdivision, Total_population, NonHispanic_White, NonHispanic_Black, Hispanic, NonHispanic_AIAN, NonHispanic_Asian, NonHispanic_NHPI, NonHispanic_Some_Other_Race, NonHispanic_Two_Or_More_Races, Nonwhite)
+
+# Change in race by place
+LancCo_Change_in_Race_by_Place <- merge(LancCo_Race_by_Place_2020, LancCo_Race_by_Place_2010, by = "County_subdivision") %>% 
+  mutate(Total_population = .[[2]] - .[[12]]) %>%
+  mutate(NonHispanic_White = .[[3]] - .[[13]]) %>%
+  mutate(NonHispanic_Black = .[[4]] - .[[14]]) %>%
+  mutate(Hispanic = .[[5]] - .[[15]]) %>%
+  mutate(NonHispanic_AIAN = .[[6]] - .[[16]]) %>%
+  mutate(NonHispanic_Asian = .[[7]] - .[[17]]) %>%
+  mutate(NonHispanic_NHPI = .[[8]] - .[[18]]) %>%
+  mutate(NonHispanic_Some_Other_Race = .[[9]] - .[[19]]) %>%
+  mutate(NonHispanic_Two_Or_More_Races = .[[10]] - .[[20]]) %>%
+  mutate(Nonwhite = .[[11]] - .[[21]]) %>%
+  rowwise(County_subdivision) %>% 
+  select(County_subdivision, Total_population, NonHispanic_White, NonHispanic_Black, Hispanic, NonHispanic_AIAN, NonHispanic_Asian, NonHispanic_NHPI, NonHispanic_Some_Other_Race, NonHispanic_Two_Or_More_Races, Nonwhite)
+
+write_csv(LancCo_Change_in_Race_by_Place, "LancCo_Change_in_Race_by_Place.csv")
+```
+
+# Import and clean multiracial data (2010 & 2020)
+```{r}
+# Create an array of codes to define multiracial variables
+x10 <- 9:71
+x10 <- sprintf("%02d", x10)
+vars_multirace_2010 <- paste("P0010", x10, sep = "")
+vars_multirace_2010 <- c("NAME", vars_multirace_2010)
+
+x20 <- 9:71
+x20 <- sprintf("%02d", x20)
+vars_multirace_2020 <- paste("P1_0", x20, "N", sep = "")
+vars_multirace_2020 <- c("NAME", vars_multirace_2020)
+
+# Fetch the data
+LancCo_Multirace_2010 <- getCensus(name = "dec/pl", vintage = 2010, vars = vars_multirace_2010, region = "county:071", regionin = "state:42", key = census_api_key)
+LancCo_Multirace_2020 <- getCensus(name = "dec/pl", vintage = 2020, vars = vars_multirace_2020, region = "county:071", regionin = "state:42", key = census_api_key)
+
+# Remove code columns
+LancCo_Multirace_2010 <- LancCo_Multirace_2010[, -c(1:2)]
+LancCo_Multirace_2020 <- LancCo_Multirace_2020[, -c(1:2)]
+
+# Match the codes to their row names
+names(LancCo_Multirace_2010) <- v10$label[match(names(LancCo_Multirace_2010), v10$name)]
+names(LancCo_Multirace_2020) <- v20$label[match(names(LancCo_Multirace_2020), v20$name)]
+
+# Fix column and row names
+remove <- c("Total!!", "Two or More Races!!", "Population of \\w+\\s?\\w+?\\s?\\w+? races:?!!", "!!Total:!!", ":", "^ ")
+
+names(LancCo_Multirace_2010) <- str_remove_all(names(LancCo_Multirace_2010), paste(remove, collapse = "|"))
+names(LancCo_Multirace_2020) <- str_remove_all(names(LancCo_Multirace_2020), paste(remove, collapse = "|"))
+
+# Transpose
+LancCo_Multirace_2010 = setNames(data.frame(t(LancCo_Multirace_2010[,-1])), LancCo_Multirace_2010[,1])
+LancCo_Multirace_2020 = setNames(data.frame(t(LancCo_Multirace_2020[,-1])), LancCo_Multirace_2020[,1])
+
+LancCo_Multirace_2010 <- rownames_to_column(LancCo_Multirace_2010, var = "Category")
+LancCo_Multirace_2020 <- rownames_to_column(LancCo_Multirace_2020, var = "Category")
+
+# Fix name
+LancCo_Multirace_2020$Category[LancCo_Multirace_2020$Category == "Population of two or more races"] <- "Two or More Races"
+```
+
+# Combine multirace data (2010 & 2020)
+```{r}
+LancCo_Multirace_by_grouping <- merge(LancCo_Multirace_2010, LancCo_Multirace_2020, by = "Category") %>% 
+  filter(!grepl("Population of", Category)) %>% 
+  select(Category, "Value_2010" = `Lancaster County, Pennsylvania.x`, "Value_2020" = `Lancaster County, Pennsylvania.y`) %>% 
+  mutate(value_increase = Value_2020 - Value_2010) %>% 
+  mutate(percent_increase = ((Value_2020 - Value_2010)/Value_2010) * 100) %>% 
+  arrange(-Value_2020)
+
+write_csv(LancCo_Multirace_by_grouping, "LancCo_Multirace_by_grouping.csv")
+
+LancCo_Multirace_by_total <- merge(LancCo_Multirace_2010, LancCo_Multirace_2020, by = "Category") %>% 
+  filter(grepl("Population of", Category)) %>% 
+  select(Category, "Value_2010" = `Lancaster County, Pennsylvania.x`, "Value_2020" = `Lancaster County, Pennsylvania.y`) %>% 
+  mutate(value_increase = Value_2020 - Value_2010) %>% 
+  mutate(percent_increase = ((Value_2020 - Value_2010)/Value_2010) * 100) %>% 
+  arrange(-Value_2020)
+
+write_csv(LancCo_Multirace_by_total, "LancCo_Multirace_by_total.csv")
+```
+

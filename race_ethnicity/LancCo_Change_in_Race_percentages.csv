@@ -1,0 +1,61 @@
+County subdivision,Population_change,White_change,Black_change,AmericanIndianandAlaskaNative_change,Asian_change,NativeHawaiianandOtherPacificIslander_change,Someotherrace_change,Twoormoreraces_change,Nonwhite_change
+Adamstown borough,0.08,0.04,0.65,-0.83,-0.36,3,2.4,2.75,-0.18
+Akron borough,0.07,-0.01,1.02,0.86,0.05,Inf,1.39,4.23,2.86
+Bart township,0.03,-0,-0.18,-1,1,Inf,4.44,5.5,4
+Brecknock township,0.05,0.01,1.36,0,0.22,2,1.39,3.91,2.15
+Caernarvon township,-0.03,-0.05,-0.36,-0.29,-0.33,Inf,0.25,4.73,-0.55
+Christiana borough,-0.05,-0.1,-0.61,-1,0,-1,11.75,1.96,0.04
+Clay township,0.09,0.04,1.85,-0.73,0.46,Inf,1.43,1.57,2.37
+Colerain township,0.07,0.06,-0.32,2.67,-0.33,-1,-0.03,1.7,-0.3
+Columbia borough,-0.02,-0.15,0.34,0.7,0.25,-0.33,1.15,1.41,1.71
+Conestoga township,0.05,-0.01,-1.5,0.25,0.67,NA,3,6.36,1.27
+Conoy township,0.04,0,0.29,0.57,0,-Inf,2.29,3.76,1.48
+Denver borough,-0.02,-0.09,0.86,-1.29,10.33,1,2.08,5.65,2.54
+Drumore township,0,-0.01,0.1,-0.7,0.05,NA,0.29,0.41,0.16
+Earl township,0.02,-0.01,0.02,-0.5,0.14,Inf,2.57,2.7,1.64
+East Cocalico township,0.04,0,0.07,0.33,0.1,-1,1.25,4.35,1.23
+East Donegal township,0.12,0.05,0.64,1,0.03,-0.5,1.96,2.9,1.97
+East Drumore township,0.04,0.01,0.18,-1,-0.83,-1,1.62,2.84,0.77
+East Earl township,0.03,0,0.15,0.43,0.14,Inf,0.36,3.17,1.15
+East Hempfield township,0.12,0.01,0.51,0.24,0.62,-0.62,0.62,2.99,2.94
+East Lampeter township,0.08,-0.04,0.45,0.06,0.17,0.5,0.91,2.89,2.92
+East Petersburg borough,0.01,-0.07,0.4,-0.22,0.13,NA,0.67,1.66,1.23
+Eden township,0.07,0.06,0,Inf,-0.58,NA,0.5,2.23,0.08
+Elizabeth township,0.03,-0.02,0.04,0.5,1.06,NA,1.79,4.46,1.77
+Elizabethtown borough,0.01,-0.07,1.1,-0.5,0.64,-0.14,1.34,2.62,2.36
+Ephrata borough,0.03,-0.05,0.7,1.52,0.02,Inf,0.93,3.08,1.52
+Ephrata township,0.1,0.04,1.12,-0.25,0.32,3,0.85,3.22,2.04
+Fulton township,0.05,-0,-0.2,-0.33,0.5,-1,3.29,3.6,1.2
+Lancaster city,-0.14,-0.71,-8.04,-3.41,4.46,-8.5,4.92,31.77,0.09
+Lancaster township,0.48,-0.3,24.15,0.44,23.53,0.29,58.2,73,94.67
+Leacock township,0.01,0.01,-0,-0.01,0.01,-0.05,0,0.03,0.01
+Lititz borough,0,-0.04,0.04,-0.15,0.12,0.67,0.07,0.56,0.39
+Little Britain township,0,-0.03,0.5,-0.67,-0.27,Inf,0.68,3.09,1.03
+Manheim borough,0.04,-0.05,1.07,3.6,0.11,-1,2.31,2.4,1.85
+Manheim township,0.15,0.03,0.52,1.26,0.6,0,0.76,3.08,3.48
+Manor township,0.11,-0.02,0.7,-0.11,1.42,0.67,1.51,3.56,4.23
+Marietta borough,0.01,-0.05,0.14,-0.7,0.5,0,1,2.85,0.95
+Martic township,0.01,-0.04,2,0.88,3,-1,2.45,3.79,1.55
+Millersville borough,-0.03,-0.14,0.2,0.71,1.76,-0.4,1.68,3.33,3.77
+Mount Joy borough,0.12,0.04,0.33,1.2,0.66,-0.5,0.75,2.16,1.42
+Mount Joy township,0.09,0.03,0.46,0.43,0.58,NA,0.89,2.46,1.29
+Mountville borough,0.08,-0.04,0.47,2,0.22,1,3.13,1.97,3.11
+New Holland borough,0.07,-0,0.04,0.33,0.01,-1,0.82,1.77,1.13
+Paradise township,0.11,0.05,0.92,1.75,1,-1,1.85,1.44,2.09
+Penn township,0.16,0.1,0.47,-0.44,0.56,12,1.33,4.52,2.9
+Pequea township,0.19,0.08,1.63,0,0.75,0,2.16,7.76,7.33
+Providence township,0.03,-0.06,0.33,-Inf,-0.71,-Inf,1.8,9,1.36
+Quarryville borough,0.04,0.01,0.4,0.05,0.54,-1,2.12,2.76,1.88
+Rapho township,0.61,0.46,2.23,0,2.56,-0.17,1.5,6.31,4.02
+Sadsbury township,0.01,0,0.2,0.07,-0.03,0,0.25,1.15,0.32
+Salisbury township,0.04,0.01,0.14,0.36,0.26,Inf,1.68,1.83,1.29
+Strasburg borough,0.11,0.04,1.45,1,1.25,-1,1.56,2.68,1.52
+Strasburg township,0.07,0.03,0.9,4,-0.12,-1,2.19,2.83,1.6
+Terre Hill borough,0.05,0.01,1.22,-0.67,-0.56,Inf,9,2.92,1.5
+Upper Leacock township,0.02,-0.07,1.07,-0.42,-0.02,7,1.69,2.97,2.74
+Warwick township,0.07,0.02,0.1,-0.25,0.55,0.33,0.97,3.57,1.34
+West Cocalico township,0.02,-0.01,1.12,1.75,-0.07,Inf,1.49,2.04,1.38
+West Donegal township,0.08,0.04,1.02,-1,0.44,Inf,3.39,3.49,2.37
+West Earl township,0.09,0.02,0.87,0.25,0.23,-0.33,1.29,4.85,2.25
+West Hempfield township,0.05,-0.04,0.1,0.16,0.35,1,1.09,3.19,1.94
+West Lampeter township,0.14,0.08,0.81,1.92,0.25,0.25,1.59,2.86,2.3
